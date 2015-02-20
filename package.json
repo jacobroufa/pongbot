@@ -1,0 +1,30 @@
+{
+  "name": "pongbot",
+  "version": "0.0.1",
+  "description": "Software for the Intel Edison to record Table Tennis games.",
+  "main": "main/pongbot.js",
+  "author": {
+    "name": "Jacob M. Roufa <jacob.roufa@gmail.com>",
+    "email": "jacob.roufa@gmail.com"
+  },
+  "license": "MIT",
+  "private": "true",
+  "dependencies": {
+    "edison-io": "^0.8.1",
+    "express": "^4.11.2",
+    "johnny-five": "^0.8.43",
+    "sqlite3": "^3.0.5"
+  },
+  "keywords": [
+    "intel edison",
+    "edison",
+    "edison-io",
+    "robot",
+    "nodebot",
+    "johnny-five"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "postinstall": "main/install.js"
+  }
+}
