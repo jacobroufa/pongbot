@@ -43,6 +43,7 @@ module.exports = function Game( game, p1, p2, bot ) {
   this.p2 = p2;
 
   this.rules = bot.rules || {
+    alternateEnding: true,
     distance: 2,
     end: 21,
     interval: 5
@@ -78,11 +79,16 @@ Game.prototype.addScore = function addScore( player ) {
 
 };
 
-// TODO: make this method respect an endInterval rule if set
 Game.prototype.activeCheck = function activeCheck() {
 
+  if ( this.rules.alternateEnding &&
+    ( this.p1_score >= this.rules.end - 1 ) &&
+    ( this.p2_score >= this.rules.end - 1 )) {
+      return this.switchActivePlayer();
+    }
+
   if (( this.p1_score + this.p2_score) % this.rules.interval === 0 ) {
-    this.switchActivePlayer();
+    return this.switchActivePlayer();
   }
 
 };
