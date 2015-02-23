@@ -26,6 +26,8 @@ module.exports = function pongbot() {
 
 pongbot.prototype.init = function init( opts ) {
 
+  this.rules = opts.rules || {};
+
   this.p1 = new pongbot.Player( opts.p1 || this.p1, this );
   this.p2 = new pongbot.Player( opts.p2 || this.p2, this );
 
