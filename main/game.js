@@ -6,20 +6,35 @@ module.exports = function Game( game, p1, p2, bot ) {
     return game;
   }
 
-  var sql;
+  var sql, sqlResult;
+
+  this.db = bot.db;
 
   if ( typeof game == 'number' ) {
-    sql = 'SELECT * FROM games WHERE id = ' + game;
+
+    this.db.get( 'SELECT * FROM games WHERE id = $game',
+      { $game: game },
+      function( er, row ) {
+        sqlResult = row;
+      });
+
   } else if ( !game ) {
-    sql = 'INSERT INTO games (p1, p2) VALUES (' + p1.id + ', ' + p2.id + ')';
+
+    this.db.run( 'INSERT INTO games (p1, p2) VALUES ( $p1, $p2 )', {
+        $p1: p1.id,
+        $p2: p2.id
+      }, function( er ) {
+        sqlResult = this;
+      });
+
   }
 
-  // execute sql here and make the result available for the Game object
+  console.log( sqlResult );
 
-  this.id = sqlResult.id;
-  this.p1_score = sqlResult.p1_score;
-  this.p2_score = sqlResult.p2_score;
-  this.winner = sqlResult.winner;
+  this.id = sqlResult.id || sqlResult.lastId;
+  this.p1_score = sqlResult.p1_score || 0;
+  this.p2_score = sqlResult.p2_score || 0;
+  this.winner = sqlResult.winner || false;
 
   this.active = false;
   this.activePlayer = false;
@@ -33,8 +48,6 @@ module.exports = function Game( game, p1, p2, bot ) {
     interval: 5
   };
 
-  this.db = bot.db;
-
   return this;
 
 };
@@ -45,8 +58,6 @@ Game.prototype.startGame = function startGame( player ) {
 
   this.activePlayer = player;
 
-  return true;
-
 };
 
 Game.prototype.addScore = function addScore( player ) {
@@ -55,15 +66,15 @@ Game.prototype.addScore = function addScore( player ) {
 
   this[field] += 1;
 
-  var sql = 'UPDATE games SET ' + field + ' = ' + this[field].score + ' WHERE id = ' + this.id;
-
-  // execute sql
+  this.db.run( 'UPDATE games SET $player = $score WHERE id = $id', {
+    $player: field,
+    $score: this[field],
+    $id: this.id
+  });
 
   if ( !this.endCheck()) {
     this.activeCheck();
   }
-
-  return true;
 
 };
 
@@ -74,15 +85,11 @@ Game.prototype.activeCheck = function activeCheck() {
     this.switchActivePlayer();
   }
 
-  return true;
-
 };
 
 Game.prototype.switchActivePlayer = function switchActivePlayer() {
 
   this.activePlayer = ( this.activePlayer === 'p1' ) ? 'p2' : 'p1';
-
-  return true;
 
 };
 
@@ -105,9 +112,10 @@ Game.prototype.endCheck = function endCheck() {
 
 Game.prototype.recordWin = function recordWin( leader, loser ) {
 
-  var sql = 'UPDATE games SET winner = ' + leader + ' WHERE id = ' + this.id;
-
-  // execute sql;
+  this.db.run( 'UPDATE games SET winner = $leader WHERE id = $id', {
+    $leader: leader,
+    $id: this.id
+  });
 
   this.active = false;
   this.winner = leader;
