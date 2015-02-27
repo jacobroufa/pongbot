@@ -1,16 +1,14 @@
 'use strict';
 
-module.exports = function Player( player, bot ) {
+var Player = function Player( player, bot ) {
 
   if ( player instanceof Player ) {
     return player;
   }
 
-  var sql, sqlResult;
-
   this.db = bot.db;
 
-  if ( typeof player == 'number' ) {
+  if ( typeof player === 'number' ) {
     // do stuff
   } else if ( !player ) {
     // do other stuff
@@ -27,3 +25,5 @@ Player.prototype.recordWin = function recordWin() {
 Player.prototype.recordLoss = function recordLoss() {
   // record a loss for the player
 };
+
+module.exports = Player;

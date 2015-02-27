@@ -1,20 +1,20 @@
 'use strict';
 
-module.exports = function Game( game, p1, p2, bot ) {
+var Game = function Game( game, p1, p2, bot ) {
 
   if ( game instanceof Game ) {
     return game;
   }
 
-  var sql, sqlResult;
+  var sqlResult;
 
   this.db = bot.db;
 
-  if ( typeof game == 'number' ) {
+  if ( typeof game === 'number' ) {
 
-    this.db.get( 'SELECT * FROM games WHERE id = $game',
-      { $game: game },
-      function( er, row ) {
+    this.db.get( 'SELECT * FROM games WHERE id = $game', {
+      $game: game
+      }, function( er, row ) {
         sqlResult = row;
       });
 
@@ -23,7 +23,7 @@ module.exports = function Game( game, p1, p2, bot ) {
     this.db.run( 'INSERT INTO games (p1, p2) VALUES ( $p1, $p2 )', {
         $p1: p1.id,
         $p2: p2.id
-      }, function( er ) {
+      }, function() {
         sqlResult = this;
       });
 
@@ -84,8 +84,8 @@ Game.prototype.activeCheck = function activeCheck() {
   if ( this.rules.alternateEnding &&
     ( this.p1_score >= this.rules.end - 1 ) &&
     ( this.p2_score >= this.rules.end - 1 )) {
-      return this.switchActivePlayer();
-    }
+    return this.switchActivePlayer();
+  }
 
   if (( this.p1_score + this.p2_score) % this.rules.interval === 0 ) {
     return this.switchActivePlayer();
@@ -130,3 +130,5 @@ Game.prototype.recordWin = function recordWin( leader, loser ) {
   this[loser].recordLoss();
 
 };
+
+module.exports = Game;
