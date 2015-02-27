@@ -46,7 +46,8 @@ var Game = function Game( game, p1, p2, bot ) {
     alternateEnding: true,
     distance: 2,
     end: 21,
-    interval: 5
+    interval: 5,
+    loserEnding: true
   };
 
   return this;
@@ -81,14 +82,28 @@ Game.prototype.addScore = function addScore( player ) {
 
 Game.prototype.activeCheck = function activeCheck() {
 
+  var placement = placement( this.p1_score, this.p2_score );
+  var leader = placement.leader;
+  var loser = placement.loser;
+  var end = this.rules.end;
+
   if ( this.rules.alternateEnding &&
-    ( this.p1_score >= this.rules.end - 1 ) &&
-    ( this.p2_score >= this.rules.end - 1 )) {
-    return this.switchActivePlayer();
+    ( leader.score >= end - 1 ) &&
+    ( loser.score >= end - 1 )) {
+    this.switchActivePlayer();
+    return false;
   }
 
-  if (( this.p1_score + this.p2_score) % this.rules.interval === 0 ) {
-    return this.switchActivePlayer();
+  if ( this.rules.loserEnding &&
+    ( leader.score >= end - 1 ) &&
+    ( loser.score < end - 1 )) {
+    this.activePlayer = loser.player;
+    return false;
+  }
+
+  if (( leader.score + loser.score ) % this.rules.interval === 0 ) {
+    this.switchActivePlayer();
+    return false;
   }
 
 };
@@ -101,13 +116,15 @@ Game.prototype.switchActivePlayer = function switchActivePlayer() {
 
 Game.prototype.endCheck = function endCheck() {
 
-  var leader = ( this.p1_score > this.p2_score ) ? 'p1' : 'p2';
-  var loser = ( leader === 'p1' ) ? 'p2' : 'p1';
-  var possible = ( leader > this.rules.end );
-  var confirmed = ( leader - loser ) >= this.rules.distance;
+  var placement = placement( this.p1_score, this.p2_score );
+  var leader = placement.leader;
+  var loser = placement.loser;
+
+  var possible = ( leader.score > this.rules.end );
+  var confirmed = ( leader.score - loser.score ) >= this.rules.distance;
 
   if ( possible && confirmed ) {
-    this.recordWin( leader, loser );
+    this.recordWin( leader.player, loser.player );
 
     return true;
   }
@@ -129,6 +146,20 @@ Game.prototype.recordWin = function recordWin( leader, loser ) {
   this[leader].recordWin();
   this[loser].recordLoss();
 
+};
+
+Game.prototype.placement = function placement(p1, p2) {
+  var place = ( p1 > p2 );
+  return {
+    leader: {
+      player: place ? 'p1' : 'p2',
+      score : place ? p1 : p2
+    },
+    loser: {
+      player: place ? 'p2' : 'p1',
+      score: place ? p2 : p1
+    }
+  };
 };
 
 module.exports = Game;
