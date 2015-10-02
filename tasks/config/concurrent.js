@@ -16,7 +16,8 @@ module.exports = {
   },
   dev: [
     'jshint',
-    'jscs'
+    'jscs'//,
+    //'jasmine'
   ],
   server: [
     'jshint',

@@ -6,15 +6,12 @@ var Pongbot = function Pongbot() {
     return new Pongbot();
   }
 
-  var Sql = require( 'sqlite3' );
-  var Edison = require( 'edison-io' );
+  /*var Edison = require( 'edison-io' );
   var Five = require( 'johnny-five' );
-
-  this.db = new Sql.Database( '../db/pongbot.db' );
 
   this.board = new Five.Board({
     io: new Edison()
-  });
+  });*/
 
   this.game = false;
   this.p1 = false;
@@ -24,20 +21,35 @@ var Pongbot = function Pongbot() {
 
 };
 
+Pongbot.prototype.Player = require( './player.js' );
+Pongbot.prototype.Players = require( './players.js' );
+Pongbot.prototype.Game = require( './game.js' );
+
 Pongbot.prototype.init = function init( opts ) {
+
+  var p1 = {}, p2 = {};
+
+  opts = opts || {};
 
   this.rules = opts.rules || {};
 
-  this.p1 = new Pongbot.Player( opts.p1 || this.p1, this );
-  this.p2 = new Pongbot.Player( opts.p2 || this.p2, this );
+  if ( opts.p1 || this.p1 ) {
+    p1 = {id: opts.p1 || this.p1};
+  }
 
-  this.game = new Pongbot.Game(( opts.game || this.game ), this.p1, this.p2, this );
+  if ( opts.p2 || this.p2 ) {
+    p2 = {id: opts.p2 || this.p2};
+  }
+
+  this.p1 = new this.Player( p1 );
+  this.p2 = new this.Player( p2 );
+
+  this.players = new this.Players([this.p1, this.p2]);
+
+  this.game = new this.Game(( opts.game || this.game ), this.rules, this.players );
 
   return true;
 
 };
-
-Pongbot.prototype.Player = require( '.player.js' );
-Pongbot.prototype.Game = require( './game.js' );
 
 module.exports = Pongbot;

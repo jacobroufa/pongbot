@@ -1,48 +1,67 @@
 'use strict';
 
-var Game = function Game( game, p1, p2, bot ) {
+var db = require( './db.js' );
+var bookshelf = require( 'bookshelf' )( db );
+
+var GameModel = bookshelf.Model.extend({
+
+  defaults: {
+    p1: 0,
+    p2: 0,
+    p1_score: 0,
+    p2_score: 0,
+    winner: ''
+  },
+
+  tableName: 'games'
+
+});
+
+var Game = function Game( game, rules, players ) {
 
   if ( game instanceof Game ) {
     return game;
   }
 
-  var sqlResult;
+  console.log( game, rules );
 
-  this.db = bot.db;
+  players.fetch().then( function( collection ) {
+    console.log( collection );
+  });
 
   if ( typeof game === 'number' ) {
 
-    this.db.get( 'SELECT * FROM games WHERE id = $game', {
-      $game: game
-      }, function( er, row ) {
-        sqlResult = row;
-      });
+    this.gameModel = new GameModel({id: game});
+
+    this.gameModel.fetch();
 
   } else if ( !game ) {
 
-    this.db.run( 'INSERT INTO games (p1, p2) VALUES ( $p1, $p2 )', {
-        $p1: p1.id,
-        $p2: p2.id
-      }, function() {
-        sqlResult = this;
-      });
+    this.gameModel = new GameModel();
+
+    //console.log( p1, p1.idAttribute, p2, p2.idAttribute );
+
+    this.gameModel.set({
+      // p1: p1.id,
+      // p2: p2.id
+    });
+
+    this.gameModel.save();
 
   }
 
-  console.log( sqlResult );
-
-  this.id = sqlResult.id || sqlResult.lastId;
-  this.p1_score = sqlResult.p1_score || 0;
-  this.p2_score = sqlResult.p2_score || 0;
-  this.winner = sqlResult.winner || false;
+  this.id = this.gameModel.id;
+  this.p1_score = this.gameModel.p1_score || 0;
+  this.p2_score = this.gameModel.p2_score || 0;
+  this.winner = this.gameModel.winner || false;
 
   this.active = false;
   this.activePlayer = false;
 
-  this.p1 = p1;
-  this.p2 = p2;
+  // this.p1 = p1;
+  // this.p2 = p2;
 
-  this.rules = bot.rules || {
+  this.rules = rules || {
     alternateEnding: true,
     distance: 2,
     end: 21,
@@ -116,7 +135,7 @@ Game.prototype.switchActivePlayer = function switchActivePlayer() {
 
 Game.prototype.endCheck = function endCheck() {
 
-  var placement = placement( this.p1_score, this.p2_score );
+  var placement = this.placement( this.p1_score, this.p2_score );
   var leader = placement.leader;
   var loser = placement.loser;
 
@@ -149,7 +168,9 @@ Game.prototype.recordWin = function recordWin( leader, loser ) {
 };
 
 Game.prototype.placement = function placement(p1, p2) {
+
   var place = ( p1 > p2 );
+
   return {
     leader: {
       player: place ? 'p1' : 'p2',
@@ -160,6 +181,7 @@ Game.prototype.placement = function placement(p1, p2) {
       score: place ? p2 : p1
     }
   };
+
 };
 
 module.exports = Game;

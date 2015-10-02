@@ -1,29 +1,48 @@
 'use strict';
 
-var Player = function Player( player, bot ) {
+var db = require( './db.js' );
+var bookshelf = require( 'bookshelf' )( db );
 
-  if ( player instanceof Player ) {
-    return player;
+var Player = bookshelf.Model.extend({
+
+  defaults: {
+    name: 'player',
+    intro: '',
+    picture: '',
+    wins: 0,
+    losses: 0
+  },
+
+  initialize: function() {
+    return this.save();
+  },
+
+  tableName: 'players',
+
+  setName: function( name ) {
+    return this.save({name: name});
+  },
+
+  setIntro: function( intro ) {
+    return this.save({intro: intro});
+  },
+
+  setPicture: function( picture ) {
+    return this.save({picture: picture});
+  },
+
+  recordWin: function() {
+    var newScore = this.get( 'wins' ) + 1;
+
+    return this.save({wins: newScore});
+  },
+
+  recordLoss: function() {
+    var newScore = this.get( 'losses' ) + 1;
+
+    return this.save({losses: newScore});
   }
 
-  this.db = bot.db;
-
-  if ( typeof player === 'number' ) {
-    // do stuff
-  } else if ( !player ) {
-    // do other stuff
-  }
-
-  return this;
-
-};
-
-Player.prototype.recordWin = function recordWin() {
-  // record a win for the player
-};
-
-Player.prototype.recordLoss = function recordLoss() {
-  // record a loss for the player
-};
+});
 
 module.exports = Player;

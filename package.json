@@ -10,8 +10,10 @@
   "license": "MIT",
   "private": "true",
   "dependencies": {
+    "bookshelf": "^0.8.0",
     "edison-io": "^0.8.1",
     "johnny-five": "^0.8.43",
+    "knex": "^0.8.3",
     "sqlite3": "^3.0.5"
   },
   "devDependencies": {
@@ -19,10 +21,12 @@
     "grunt": "^0.4.5",
     "grunt-available-tasks": "^0.5.4",
     "grunt-concurrent": "^0.5.0",
+    "grunt-contrib-jasmine": "^0.8.2",
     "grunt-contrib-jshint": "^0.10.0",
     "grunt-contrib-watch": "^0.6.1",
     "grunt-jscs": "^1.1.0",
     "grunt-npm-install": "^0.1.0",
+    "jasmine": "^2.2.1",
     "jshint-stylish": "^0.4.0",
     "jshint-stylish-ex": "^0.2.0",
     "load-grunt-tasks": "^0.4.0",
@@ -41,6 +45,8 @@
     "table tennis"
   ],
   "scripts": {
+    "start": "node index.js",
+    "debug": "node --debug-brk index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   }
 }
